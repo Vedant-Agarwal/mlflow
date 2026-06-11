@@ -32,10 +32,12 @@ jest.mock('@tanstack/react-virtual', () => {
 const mockFetch = jest.mocked(fetchArtifactUnified);
 
 const renderView = (props = {}) =>
-  renderWithDesignSystem(<ShowArtifactTextView runUuid="run-1" path="output.log" {...props} />);
+  renderWithDesignSystem(<ShowArtifactTextView runUuid="run-1" path="output.log" experimentId="123" {...props} />);
 
 describe('ShowArtifactTextView virtualization', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('renders small files fully without virtualization', async () => {
     mockFetch.mockResolvedValue('line one\nline two\nline three');

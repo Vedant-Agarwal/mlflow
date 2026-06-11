@@ -1,5 +1,6 @@
 import React, { Component, useCallback, useEffect, useRef, useState } from 'react';
 import { Prism as SyntaxHighlighter, createElement } from 'react-syntax-highlighter';
+import type { SyntaxHighlighterProps } from 'react-syntax-highlighter';
 import { coy as style, atomDark as darkStyle } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { getExtension, getLanguage } from '../../../common/utils/FileUtils';
@@ -22,11 +23,7 @@ const VIRTUALIZATION_LINE_THRESHOLD = 5000;
 const ESTIMATED_LINE_HEIGHT = 20;
 const VIRTUALIZED_LINE_OVERSCAN = 25;
 
-type SyntaxHighlighterRendererProps = {
-  rows: any[];
-  stylesheet: any;
-  useInlineStyles: boolean;
-};
+type SyntaxHighlighterRendererProps = Parameters<NonNullable<SyntaxHighlighterProps['renderer']>>[0];
 
 type VirtualizedRowsProps = SyntaxHighlighterRendererProps & {
   scrollElementRef: React.RefObject<HTMLPreElement>;
@@ -51,14 +48,17 @@ const VirtualizedRows = ({ rows, stylesheet, useInlineStyles, scrollElementRef }
     overscan: VIRTUALIZED_LINE_OVERSCAN,
   });
 
+  // Rows render as block-styled <span>s rather than <div>s: this renderer's output is
+  // mounted inside the highlighter's <code> tag, where <div> would be invalid HTML
   return (
-    <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+    <span style={{ display: 'block', height: virtualizer.getTotalSize(), position: 'relative' }}>
       {virtualizer.getVirtualItems().map((virtualLine) => (
-        <div
+        <span
           key={virtualLine.key}
           data-index={virtualLine.index}
           ref={virtualizer.measureElement}
           style={{
+            display: 'block',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -72,9 +72,9 @@ const VirtualizedRows = ({ rows, stylesheet, useInlineStyles, scrollElementRef }
             useInlineStyles,
             key: `line-${virtualLine.index}`,
           })}
-        </div>
+        </span>
       ))}
-    </div>
+    </span>
   );
 };
 
